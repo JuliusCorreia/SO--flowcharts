@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aviation Security – Interactive Flowcharts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #050814;
+      --card: #101525;
+      --accent: #3da9fc;
+      --accent-soft: rgba(61,169,252,0.14);
+      --accent-strong: rgba(61,169,252,0.25);
+      --text-main: #f5f7ff;
+      --text-muted: #b5bdd9;
+      --border-subtle: #252a3c;
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #151a2c 0, #050814 55%, #020308 100%);
+      color: var(--text-main);
+    }
+    .wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px 12px 40px;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(5,8,20,0.98), rgba(5,8,20,0.9));
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 12px 8px;
+      margin: 0 -12px 10px;
+    }
+    header h1 {
+      font-size: 1.1rem;
+      margin: 0 0 4px;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    header p {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tab-btn {
+      font-size: 0.78rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(10,14,30,0.94);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .section-group {
+      margin-top: 5px;
+    }
+    .flow-section {
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(10,14,30,0.96);
+      overflow: hidden;
+    }
+    .flow-header {
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .flow-header span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-badge {
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .flow-arrow {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    .flow-section.open .flow-arrow {
+      transform: rotate(90deg);
+      color: var(--accent);
+    }
+    .flow-body {
+      padding: 6px 8px 10px;
+      border-top: 1px solid #22263a;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+    .step {
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #20253a;
+      background: #090d1a;
+      overflow: hidden;
+    }
+    .step-header {
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .step-if {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-main);
+    }
+    .step-then-label {
+      font-size: 0.72rem;
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 1px 6px;
+      border: 1px solid var(--accent-soft);
+      background: rgba(61,169,252,0.08);
+      margin-left: 6px;
+    }
+    .step-arrow {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    .step.open .step-arrow {
+      transform: rotate(90deg);
+      color: var(--accent);
+    }
+    .step-body {
+      padding: 4px 8px 7px;
+      border-top: 1px dashed #23273a;
+      display: none;
+    }
+    .step.open .step-body {
+      display: block;
+    }
+    .step-body ul {
+      margin: 3px 0 0 14px;
+      padding-left: 0;
+    }
+    .step-body li {
+      margin-bottom: 2px;
+    }
+    .tag {
+      font-size: 0.7rem;
+      padding: 1px 5px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+    .tag-body { border-color: #8c7cff; color: #c3bbff; }
+    .tag-bag { border-color: #3da9fc; color: #8bd1ff; }
+    .tag-escalate { border-color: var(--danger); color: #ffb5b5; }
+
+    .hidden { display: none; }
+
+    @media (min-width: 700px) {
+      .flow-body { font-size: 0.86rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>Interactive Security Flowcharts</h1>
+      <p>Tap a flow, then tap each IF step to reveal the THEN outcome.</p>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="body">Body flows</button>
+        <button class="tab-btn" data-tab="bag">Bag flows</button>
+      </div>
+    </header>
+
+    <div id="body-flows" class="section-group">
+      <!-- 1) Overall Passenger Screening -->
+      <div class="flow-section open">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">1</span>
+            Overall Passenger Screening (People)
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger arrives at lane</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN greet the passenger.</li>
+                <li>THEN explain the screening process.</li>
+                <li>THEN direct them to the divest/loading area.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger has removed required items (coats, belts, shoes, pockets empty)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN send the passenger to the QPS entry point.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger is an exception (wheelchair, infant &lt; 1 m, pacemaker/medical, very tall &gt; 2 m)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN skip QPS.</li>
+                <li>THEN go to adapted search (manual search + HHMD + ETD as required).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger is not an exception</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN send the passenger through QPS once.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS is clear (no activations)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN the passenger goes to collect bags.</li>
+                <li>THEN the passenger exits the screening area.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS shows any activation</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN follow the QPS Decision / Activation Flows (2 & 3).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) QPS Decision Flow -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">2</span>
+            QPS Decision Flow (Use / Skip)
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger can stand correctly, is ≥ 1 m tall, and has no QPS medical exemption</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN use QPS for screening.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger is &lt; 1 m tall</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN do not use QPS.</li>
+                <li>THEN go to adapted manual search + HHMD/ETD as appropriate.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger has medical reason OR cannot assume correct pose</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN do not use QPS.</li>
+                <li>THEN call SM.</li>
+                <li>THEN perform adapted search (manual + HHMD/ETD as per SOP).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger is &gt; 2 m tall (zone 2 above QPS limit)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN call SM.</li>
+                <li>THEN perform adapted search (partial QPS plus manual/HHMD if allowed).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger refuses QPS for non-medical reasons</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN call SM.</li>
+                <li>THEN move to private search.</li>
+                <li>THEN remove shoes for X-ray.</li>
+                <li>THEN conduct full physical search + HHMD + ETD.</li>
+                <li>THEN ensure any rejected bags remain in the search lane.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) QPS Result / Activation -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">3</span>
+            QPS Result / Activation Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS result = “clear” (no activations)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN passenger proceeds to collect bags and leave.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS shows single or multiple zones activated (not RND only)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN direct passenger to same-gender searcher.</li>
+                <li>THEN use HHMD on activated zones.</li>
+                <li>THEN follow HHMD flow to resolve activations.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS shows RND at left ankle with no real activations</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN send passenger to SAMDEX (shoe scanner).</li>
+                <li>THEN follow SAMDEX flow.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS shows RND plus real activations in other zones</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN treat non-RND zones as real activations.</li>
+                <li>THEN use HHMD/physical search on those zones.</li>
+                <li>THEN also send passenger to SAMDEX if RND indicates shoes.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS result = “inadequate scan”</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN correct passenger posture.</li>
+                <li>THEN repeat the scan once.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS is “inadequate” twice in a row</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN stop re-scanning.</li>
+                <li>THEN perform a full physical body search instead.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS result = “insufficient quality” (system issue)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN ask passenger to step back from the scanner.</li>
+                <li>THEN call SM.</li>
+                <li>THEN SM decides next step (manual search or re-routing).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) SAMDEX -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">4</span>
+            SAMDEX (Shoe Scanner) Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS result has RND with shoes on</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN send passenger to SAMDEX.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS result has zone 4 activation</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN send passenger to SAMDEX (unless they wear boots above the ankle).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger is wearing boots above the ankle</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN do NOT use SAMDEX.</li>
+                <li>THEN remove boots and send them through X-ray instead.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF SAMDEX result = green</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN shoes are cleared; no extra shoe action required.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF SAMDEX result = yellow (first time)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN repeat the test on SAMDEX.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF SAMDEX result = yellow twice in a row</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN treat as real activation.</li>
+                <li>THEN escalate to SM.</li>
+                <li>THEN remove shoes.</li>
+                <li>THEN perform zone 4 physical search + HHMD.</li>
+                <li>THEN send shoes through X-ray.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF SAMDEX result = blue (metal) OR orange (possible explosive)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN escalate to SM.</li>
+                <li>THEN remove shoes.</li>
+                <li>THEN perform zone 4 physical search + HHMD.</li>
+                <li>THEN send shoes through X-ray.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF medical condition prevents correct SAMDEX stance</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN remove shoes and X-ray them.</li>
+                <li>IF shoes cannot be removed → ETD shoes and fastenings + physical check on shoes.</li>
+                <li>No private search required solely for this.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger refuses SAMDEX (non-medical)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN call SM.</li>
+                <li>THEN move to private search.</li>
+                <li>THEN shoes removed and X-rayed.</li>
+                <li>THEN full physical search + HHMD + ETD.</li>
+                <li>THEN any rejected bags remain in the search lane.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) HHMD -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">5</span>
+            HHMD (Hand-Held Metal Detector) Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF physical body search is required AND no HHMD restriction</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN use HHMD on relevant body areas.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF HHMD does NOT activate on an area</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN proceed to next area or finish search when complete.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF HHMD activates on an area</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN search a 6-inch circle around that point with HHMD.</li>
+                <li>THEN conduct physical touch search in that area.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF HHMD activates but no prohibited item found and suspicion remains</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN consider ETD swabs on that area or clothing.</li>
+                <li>THEN call SM if concern continues.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger has pacemaker or device where HHMD is contraindicated</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN do not use HHMD on that area.</li>
+                <li>THEN use adapted manual search plus ETD as appropriate.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6) ETD on People -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">6</span>
+            ETD on People Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF random selection / system activation / profiling requires ETD on passenger</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN choose ETD areas: fastenings, palms, shoes, waistband, headwear.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger has buttons or fastenings</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN swab buttons and both sides of both palms.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger has shoes on</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN swab across shoe surfaces, around the back and along laces.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger has no shoes</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN swab the waistband area instead.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger wears religious headwear</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN use “halo and mohawk” pattern when swabbing headwear.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = green</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN no explosive trace detected; continue the process as normal.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = red (first time)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN repeat ETD test using a new sample.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = red twice</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN escalate to SM.</li>
+                <li>THEN follow local escalation and further search/actions.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = yellow</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN refer to SM for decision (re-test, second machine, or escalate).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7) Body / Private Search -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">7</span>
+            Body / Private Search Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF QPS activation cannot be resolved OR passenger refuses QPS OR strong profiling concern exists</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN arrange a body search.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF search is in public and passenger accepts public search</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN perform full physical search with HHMD/ETD as required.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger requests private search OR SM decides private search is needed</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN move passenger to a private room.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF private search is conducted</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN ensure same-gender officer and witness are present.</li>
+                <li>THEN obtain consent form as required.</li>
+                <li>THEN perform full physical search + full HHMD and ETD checks.</li>
+                <li>THEN X-ray shoes as part of the process.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF during body search a prohibited but legal item is found</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN inform SM discreetly.</li>
+                <li>THEN complete the search.</li>
+                <li>THEN handle the item as prohibited but legal (remove, offer options).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF during body search a suspected FA/EX/IID/IED is found</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN stop the search immediately.</li>
+                <li>THEN do NOT touch the item further.</li>
+                <li>THEN discreetly call SM.</li>
+                <li>THEN hold passenger safely and await instructions.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8) Under-18 / Safeguarding -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">8</span>
+            Under‑18 / Safeguarding Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger is under 18 years old</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN ensure a parent or guardian is present as witness for any search.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF no parent/guardian is available</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN use a lane partner as witness (per safeguarding SOP).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF parent/guardian leaves during search</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN stop the search immediately.</li>
+                <li>THEN wait until the parent/guardian returns.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF parent/guardian returns</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN explain what will happen.</li>
+                <li>THEN restart or continue search with them present.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF no suitable adult can stay to witness</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN follow local safeguarding procedure.</li>
+                <li>THEN consult SM before proceeding further.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAG FLOWS -->
+    <div id="bag-flows" class="section-group hidden">
+      <!-- 9) Overall Tray & Bag -->
+      <div class="flow-section open">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">9</span>
+            Overall Tray & Bag Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger arrives at loading area</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN instruct them to remove coats, belts, shoes, LAGs and large metal items.</li>
+                <li>THEN ensure items are placed into trays.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF trays are ready and tidy (1 bag per tray, items flat)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN send trays through X‑ray/CT.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF image is clear (no alarms, no suspicion)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN mark tray as cleared.</li>
+                <li>THEN passenger collects bag and leaves screening area.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF there is an EDS alarm, shield/density alarm, or operator suspicion</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN reject tray to bag search area for manual resolution.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10) X-ray / CT Decision -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">10</span>
+            X‑ray / CT Decision Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF CT/X‑ray image shows no anomalies AND no alarms</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN mark bag clear.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF image shows dense area with shield/density alarm</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN reject bag for manual search.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF EDS draws a red box (possible explosive)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN reject bag for search and treat as higher priority.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF operator sees obvious firearm or IED shape</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN press Obvious Threat button.</li>
+                <li>THEN reject bag and escalate to SM/response.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF operator is unsure but sees suspicious item</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN use zoom/rotate/slice tools.</li>
+                <li>IF still concerned → reject bag for search and note concern.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11) Bag Search -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">11</span>
+            Bag Search Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF bag is rejected from X‑ray/CT</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN move bag to search area.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger gives consent (“Yes, you may search my bag”)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN begin the bag search.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF passenger refuses search</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN call SM.</li>
+                <li>THEN follow refusal SOP (possible refusal to carry).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">DURING search – IF item appears harmless and matches image</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN move that item to the clear tray.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">DURING search – IF item is of concern (dense, concealed, unusual)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN test item with ETD or EMA‑4, or inspect more thoroughly.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF prohibited but legal item is found (e.g. large scissors, tools, excess liquids)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN remove item and place it out of passenger’s reach.</li>
+                <li>THEN complete the search.</li>
+                <li>THEN explain and offer options: return landside, left luggage, hold baggage (if allowed), or voluntary abandon.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF prohibited and illegal/dangerous item is found (e.g. certain weapons)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN remove the item and place it out of reach.</li>
+                <li>THEN complete the search.</li>
+                <li>THEN discreetly call SM.</li>
+                <li>THEN record search as complete and await further instructions.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF IID, firearm, component, or suspected explosive is found</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN stop search immediately.</li>
+                <li>THEN do not touch the item further.</li>
+                <li>THEN move tray away if safe.</li>
+                <li>THEN ask customer to remain in place.</li>
+                <li>THEN discreetly call SM and confirm search is incomplete.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12) LAGs & EMA-4 -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">12</span>
+            LAGs and EMA‑4 Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF LAG exceeds standard rules OR needs secondary check</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN test with EMA‑4 (if container type is allowed).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF container is NOT suitable for EMA‑4 (cup, bag of fluid, flask, leaking, refillable metal)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN follow local LAG rules (may require disposal or alternative handling).</li>
+                <li>THEN do NOT use EMA‑4 on this container.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF EMA‑4 result = green</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN LAG is cleared.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF EMA‑4 result = red</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN leave container in cavity.</li>
+                <li>THEN call SM; likely leads to disposal or abandonment decision.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF EMA‑4 result = yellow (first time)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN retest on same machine.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF EMA‑4 result = yellow twice on same machine</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN test on a second EMA‑4 unit.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF second machine result = green</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN clear the LAG.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF second machine result = yellow</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN call SM.</li>
+                <li>THEN SM checks procedure, profiles passenger, and may require extra search or disposal.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 13) ETD on Bags -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">13</span>
+            ETD on Bags / Items Flow
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF bag contains wrapped items, electricals, organ containers, or camera film</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN consider ETD swabs on those items as per SOP.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result on item = green</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN no explosive trace detected on that item.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = red (first time)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN repeat ETD on a fresh swab from that item.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = red twice</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN escalate to SM.</li>
+                <li>THEN consider extra search, passenger questioning, or further action.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF ETD result = yellow</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN refer to SM.</li>
+                <li>THEN follow local procedure (e.g. retest or second machine).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14) Handling Prohibited Items (Bags) -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">14</span>
+            Handling Prohibited Items (Bags)
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item discovered is prohibited but legal (e.g. scissors, tools, oversize liquids)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN remove item and keep it out of passenger’s reach.</li>
+                <li>THEN complete the bag search.</li>
+                <li>THEN inform passenger and offer options:
+                  <ul>
+                    <li>Return to landside.</li>
+                    <li>Place in hold baggage (if allowed).</li>
+                    <li>Use left-luggage service.</li>
+                    <li>Voluntarily abandon the item.</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item discovered is prohibited AND illegal or clearly dangerous (e.g. certain weapons)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN remove item and place out of reach.</li>
+                <li>THEN complete the search.</li>
+                <li>THEN discreetly call SM.</li>
+                <li>THEN follow incident and recording procedures.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item appears to be FA/EX/IID/IED</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN stop search immediately.</li>
+                <li>THEN do not touch the item.</li>
+                <li>THEN move tray away if safe.</li>
+                <li>THEN request customer to remain.</li>
+                <li>THEN discreetly call SM and confirm search incomplete.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 15) Special Items & Exemptions -->
+      <div class="flow-section">
+        <div class="flow-header">
+          <span>
+            <span class="flow-badge">15</span>
+            Special Items & Exemptions (Bags)
+          </span>
+          <span class="flow-arrow">▶</span>
+        </div>
+        <div class="flow-body">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item is in a STEB (duty‑free liquids)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN check seal and receipt.</li>
+                <li>IF intact and compliant → allow as per rules.</li>
+                <li>IF tampered or no receipt → treat as standard LAG.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF bag contains cremated remains</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN allow X‑ray.</li>
+                <li>IF image suggests &gt; 100 g or prohibited article → reject and perform visual/physical inspection.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF human organs are present</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN do NOT X‑ray the container.</li>
+                <li>THEN perform ETD on the container.</li>
+                <li>THEN involve SM immediately.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF camera film is present</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN escalate to SM.</li>
+                <li>THEN perform hand-check instead of X‑ray where possible.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item is an evidence bag</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN allow X‑ray.</li>
+                <li>THEN do NOT open or physically search the bag.</li>
+                <li>THEN follow instructions from SM/police.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item is a diplomatic bag or VIP‑sealed bag</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN once cleared by SM, treat as exempt from normal screening.</li>
+                <li>THEN do NOT X‑ray further.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item is complex/oversized (e.g. instruments)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN call SM.</li>
+                <li>THEN perform full hand check (and X‑ray if permitted).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-header">
+              <div class="step-if">IF item is non‑complex but cannot fit in tray (pushchair, pram, aid)</div>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <ul>
+                <li>THEN empty it completely.</li>
+                <li>THEN X‑ray if possible.</li>
+                <li>AND/OR pass through QPS + full hand check depending on item size/type.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab toggle
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const bodyFlows = document.getElementById('body-flows');
+    const bagFlows = document.getElementById('bag-flows');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        if (tab === 'body') {
+          bodyFlows.classList.remove('hidden');
+          bagFlows.classList.add('hidden');
+        } else {
+          bagFlows.classList.remove('hidden');
+          bodyFlows.classList.add('hidden');
+        }
+      });
+    });
+
+    // Flow-section expand/collapse
+    document.querySelectorAll('.flow-header').forEach(h => {
+      h.addEventListener('click', () => {
+        const section = h.parentElement;
+        section.classList.toggle('open');
+        const body = section.querySelector('.flow-body');
+        if (body) {
+          body.style.display = section.classList.contains('open') ? 'block' : 'none';
+        }
+      });
+    });
+
+    // Step expand/collapse
+    document.querySelectorAll('.step-header').forEach(h => {
+      h.addEventListener('click', () => {
+        const step = h.parentElement;
+        step.classList.toggle('open');
+      });
+    });
+
+    // Initialize display for open sections
+    document.querySelectorAll('.flow-section').forEach(sec => {
+      const body = sec.querySelector('.flow-body');
+      if (sec.classList.contains('open')) {
+        body.style.display = 'block';
+      } else {
+        body.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
