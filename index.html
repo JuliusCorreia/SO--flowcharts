@@ -24,20 +24,20 @@
       color: var(--text-main);
     }
     .wrapper {
-      max-width: 900px;
+      max-width: 640px;
       margin: 0 auto;
-      padding: 12px 12px 40px;
+      padding: 10px 10px 32px;
     }
     header {
-      padding: 10px 0 6px;
+      padding: 8px 0 6px;
       border-bottom: 1px solid #252a3c;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     header h1 {
       margin: 0 0 4px;
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--accent);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
     header p {
@@ -47,27 +47,32 @@
     }
     .flow-select {
       margin-top: 8px;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
     }
     select {
-      margin-left: 4px;
-      padding: 3px 6px;
-      border-radius: 6px;
+      flex: 1;
+      min-width: 180px;
+      padding: 5px 8px;
+      border-radius: 999px;
       border: 1px solid #252a3c;
       background: #090d1a;
       color: var(--text-main);
-      font-size: 0.84rem;
+      font-size: 0.82rem;
     }
     .game-card {
       margin-top: 10px;
       background: var(--card);
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #252a3c;
       padding: 10px;
     }
     .flow-label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-muted);
@@ -90,14 +95,15 @@
     }
     .option-btn {
       text-align: left;
-      border-radius: 8px;
+      border-radius: 999px;
       border: 1px solid #252a3c;
       background: #090d1a;
       color: var(--text-main);
-      padding: 6px 8px;
-      font-size: 0.86rem;
+      padding: 8px 10px;
+      font-size: 0.9rem;
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s, transform 0.05s;
+      line-height: 1.3;
     }
     .option-btn:hover {
       border-color: var(--accent);
@@ -114,7 +120,7 @@
     .feedback {
       font-size: 0.82rem;
       margin-top: 4px;
-      min-height: 1.2em;
+      min-height: 1.3em;
     }
     .feedback.correct {
       color: var(--correct);
@@ -122,24 +128,56 @@
     .feedback.wrong {
       color: var(--danger);
     }
-    .next-btn {
-      margin-top: 8px;
-      padding: 5px 10px;
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .next-btn,
+    .restart-btn,
+    .choose-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 7px 10px;
       font-size: 0.84rem;
       border-radius: 999px;
       border: 1px solid var(--accent);
       background: var(--accent-soft);
       color: var(--accent);
       cursor: pointer;
+      text-align: center;
     }
     .next-btn:disabled {
       opacity: 0.4;
       cursor: default;
     }
+    .restart-btn,
+    .choose-btn {
+      display: none;
+    }
+    .restart-btn.visible,
+    .choose-btn.visible {
+      display: inline-block;
+    }
     .progress {
-      margin-top: 6px;
+      margin-top: 8px;
       font-size: 0.78rem;
       color: var(--text-muted);
+      text-align: right;
+    }
+
+    @media (max-width: 480px) {
+      .wrapper {
+        padding: 8px 8px 28px;
+      }
+      .option-btn {
+        font-size: 0.88rem;
+        padding: 8px 9px;
+      }
+      header h1 {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
@@ -147,14 +185,14 @@
   <div class="wrapper">
     <header>
       <h1>Aviation Security – Flow Training Game</h1>
-      <p>Practice decision-making for each flow. Choose a flow, then pick the best action at every step.</p>
+      <p>Tap a flow, then choose the best action at each step. Works best in portrait on mobile.</p>
       <div class="flow-select">
-        Flow:
+        <span>Flow:</span>
         <select id="flowSelect">
           <option value="1">Body 1 – Overall Passenger Screening</option>
           <option value="2">Body 2 – QPS Decision (Use / Skip)</option>
           <option value="3">Body 3 – QPS Result / Activation</option>
-          <!-- We will add 4–15 here next -->
+          <!-- Add 4–15 here once defined -->
         </select>
       </div>
     </header>
@@ -165,16 +203,17 @@
       <div id="question" class="question"></div>
       <div id="options" class="options"></div>
       <div id="feedback" class="feedback"></div>
-      <button id="nextBtn" class="next-btn" disabled>Next step ▶</button>
+      <div class="controls-row">
+        <button id="nextBtn" class="next-btn" disabled>Next step ▶</button>
+        <button id="restartBtn" class="restart-btn">Restart this flow</button>
+        <button id="chooseBtn" class="choose-btn">Choose another flow</button>
+      </div>
       <div id="progress" class="progress"></div>
     </div>
   </div>
 
   <script>
-    // === FLOW DATA ===
-    // Each flow is an object: { label, steps: [ ... ] }
-    // Each step has: id, situation, question, options[], feedbackCorrect, feedbackWrong.
-
+    // === FLOW DATA (1–3 only, as before) ===
     const flows = {
       "1": {
         label: "Body Flow 1 – Overall Passenger Screening",
@@ -276,7 +315,7 @@
             question: "End of this path.",
             options: [
               {
-                text: "Restart Body Flow 1 from the beginning.",
+                text: "Continue",
                 correct: true,
                 next: "arrive"
               }
@@ -333,7 +372,7 @@
             question: "End of this path.",
             options: [
               {
-                text: "Restart Body Flow 1 from the beginning.",
+                text: "Continue",
                 correct: true,
                 next: "arrive"
               }
@@ -421,7 +460,7 @@
             question: "End of this path.",
             options: [
               {
-                text: "Restart Body Flow 2 from the beginning.",
+                text: "Continue",
                 correct: true,
                 next: "ready"
               }
@@ -454,7 +493,7 @@
             question: "End of this path.",
             options: [
               {
-                text: "Restart Body Flow 2 from the beginning.",
+                text: "Continue",
                 correct: true,
                 next: "ready"
               }
@@ -608,7 +647,7 @@
             question: "End of Body Flow 3.",
             options: [
               {
-                text: "Restart Body Flow 3 from the beginning.",
+                text: "Continue",
                 correct: true,
                 next: "post_qps"
               }
@@ -619,8 +658,6 @@
         ],
         startId: "post_qps"
       }
-
-      // Flows 4–15 will be added in the same structure.
     };
 
     // === GAME ENGINE ===
@@ -635,6 +672,8 @@
     const optionsEl = document.getElementById("options");
     const feedbackEl = document.getElementById("feedback");
     const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const chooseBtn = document.getElementById("chooseBtn");
     const progressEl = document.getElementById("progress");
 
     function loadFlow(flowId) {
@@ -644,7 +683,20 @@
       currentStepId = flow.startId;
       stepsTaken = 0;
       flowLabelEl.textContent = flow.label;
+      restartBtn.classList.remove("visible");
+      chooseBtn.classList.remove("visible");
       renderStep();
+    }
+
+    function isEndStep(flow, step) {
+      // Treat as "end" if this step's only option leads back to the start
+      // or is clearly labelled as an end (id starts with "end_").
+      if (step.id.startsWith("end_")) return true;
+      if (step.options && step.options.length === 1) {
+        const opt = step.options[0];
+        if (opt.next === flow.startId) return true;
+      }
+      return false;
     }
 
     function renderStep() {
@@ -660,6 +712,8 @@
       feedbackEl.className = "feedback";
       nextBtn.disabled = true;
       nextBtn.dataset.next = "";
+      restartBtn.classList.remove("visible");
+      chooseBtn.classList.remove("visible");
 
       step.options.forEach(opt => {
         const btn = document.createElement("button");
@@ -670,6 +724,9 @@
       });
 
       progressEl.textContent = "Flow " + currentFlowId + " • Step " + stepsTaken + " • Node: " + step.id;
+
+      // If this is an end step, show restart/choose buttons after they answer.
+      step._isEnd = isEndStep(flow, step);
     }
 
     function handleChoice(step, option, buttonEl) {
@@ -688,6 +745,12 @@
 
       nextBtn.dataset.next = option.next;
       nextBtn.disabled = false;
+
+      if (step._isEnd && option.correct) {
+        // On end steps, show restart and choose buttons as well
+        restartBtn.classList.add("visible");
+        chooseBtn.classList.add("visible");
+      }
     }
 
     nextBtn.addEventListener("click", () => {
@@ -695,6 +758,16 @@
       if (!next) return;
       currentStepId = next;
       renderStep();
+    });
+
+    restartBtn.addEventListener("click", () => {
+      loadFlow(currentFlowId);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    chooseBtn.addEventListener("click", () => {
+      // Just scroll up to the flow selector; user can change flow.
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     flowSelect.addEventListener("change", () => {
