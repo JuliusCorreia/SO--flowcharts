@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Aviation Security – Interactive Flowcharts</title>
+  <title>Body Flow 1 – Overall Passenger Screening</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
     body {
       margin: 0;
@@ -12,19 +11,10 @@
       background: #050814;
       color: #f5f7ff;
     }
-    .wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 12px 12px 40px;
-    }
     header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: linear-gradient(to bottom, #050814 0, rgba(5,8,20,0.96) 70%, rgba(5,8,20,0.9) 100%);
-      padding: 10px 12px 8px;
+      padding: 10px 12px;
+      background: #050814;
       border-bottom: 1px solid #252a3c;
-      margin: 0 -12px 12px;
     }
     header h1 {
       font-size: 1.1rem;
@@ -38,127 +28,82 @@
       margin: 0;
       color: #b5bdd9;
     }
-    .tabs-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
+    .wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 10px 40px;
     }
-    .tab-btn {
-      font-size: 0.78rem;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid #252a3c;
-      background: rgba(10,14,30,0.95);
-      color: #b5bdd9;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .tab-btn.active {
-      background: rgba(61,169,252,0.18);
-      color: #3da9fc;
-      border-color: #3da9fc;
-    }
-    .chart-container {
-      margin-top: 10px;
-      border-radius: 10px;
-      border: 1px solid #252a3c;
-      background: #090d1a;
-      padding: 8px;
-      display: none;
+    #diagram {
+      width: 100%;
       overflow-x: auto;
+      background: #090d1a;
+      border-radius: 10px;
+      padding: 6px;
     }
-    .chart-container.active {
-      display: block;
-    }
-    .chart-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin: 0 0 4px;
-      color: #f5f7ff;
-    }
-    .chart-caption {
-      font-size: 0.78rem;
-      color: #b5bdd9;
-      margin: 0 0 6px;
-    }
-    .mermaid {
-      background: #050814;
-      border-radius: 8px;
-      padding: 4px;
-      min-width: 420px;
+    svg {
+      max-width: none;
     }
   </style>
-
-  <!-- Mermaid v11 from CDN -->
-  <script type="module">
-    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: "dark",
-      look: "handDrawn",
-      securityLevel: "loose",
-      flowchart: {
-        curve: "basis",
-        htmlLabels: true
-      }
-    });
-  </script>
+  <!-- Raphael and Flowchart.js from CDN (no build tools) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.15.0/flowchart.min.js"></script>
 </head>
 <body>
+  <header>
+    <h1>Body Flow 1 – Overall Passenger Screening</h1>
+    <p>Graphical IF → THEN flow, rendered with Flowchart.js.</p>
+  </header>
   <div class="wrapper">
-    <header>
-      <h1>Aviation Security – Interactive Flowcharts</h1>
-      <p>Select a flow. Use pinch/zoom or scroll to explore on mobile.</p>
-
-      <div class="tabs-row">
-        <button class="tab-btn active" data-target="flow-1">Body 1 – Overall Screening</button>
-        <!-- Add more buttons later -->
-      </div>
-    </header>
-
-    <!-- BODY FLOW 1 ONLY (for now) -->
-    <section id="flow-1" class="chart-container active">
-      <p class="chart-title">Body Flow 1 – Overall Passenger Screening</p>
-      <p class="chart-caption">From arrival at the lane through QPS / exception handling to exit.</p>
-
-      <div class="mermaid">
-flowchart TD
-  A[Passenger arrives at lane] --> B[Officer greets and explains process<br/>Direct passenger to divest/loading area]
-
-  B --> C{Required items removed?<br/>Coats, belts, shoes, pockets empty}
-
-  C -- "No" --> C1[Coach passenger to remove items<br/>Check trays again] --> C
-  C -- "Yes" --> D{Exception?<br/>Wheelchair, infant under 1 m,<br/>pacemaker or medical issue, height over 2 m}
-
-  D -- "Yes: exception" --> E[Skip QPS<br/>Go to adapted search<br/>Manual search plus HHMD and ETD]
-  D -- "No: not exception" --> F[Send passenger through QPS once]
-
-  F --> G{QPS result}
-
-  G -- "Clear" --> H[Passenger collects bags<br/>Passenger exits screening]
-  G -- "Activation" --> I[Follow QPS Use or Skip (Flow 2)<br/>and QPS Result flow (Flow 3)]
-      </div>
-    </section>
-
-    <!-- You can paste additional <section> blocks here for flows 2–15 -->
-
+    <div id="diagram"></div>
   </div>
 
   <script>
-    // Tab switching
-    const buttons = document.querySelectorAll('.tab-btn');
-    const charts = document.querySelectorAll('.chart-container');
+    // Flow 1: Overall Passenger Screening (People)
+    var code = `
+st=>start: Passenger arrives at lane
+de=>operation: Greet passenger\\nExplain process\\nDirect to divest/loading area
+req=>condition: Required items removed?\\n(coats, belts, shoes, pockets empty)
+tidy=>operation: Coach passenger to remove items\\nCheck trays again
+exc=>condition: Exception?\\nWheelchair / infant < 1m / pacemaker / > 2m
+adapt=>operation: Skip QPS\\nAdapted search\\n(manual + HHMD + ETD)
+noexc=>operation: Send passenger through QPS once
+qps=>condition: QPS result?
+clear=>operation: Passenger collects bags\\nPassenger exits screening
+act=>operation: Follow QPS Decision / Activation\\n(Flows 2 and 3)
+e=>end: End
 
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
-        charts.forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        const target = document.getElementById(btn.dataset.target);
-        if (target) target.classList.add('active');
-      });
+st->de->req
+req(yes)->exc
+req(no)->tidy->req
+exc(yes)->adapt->e
+exc(no)->noexc->qps
+qps(yes)->clear->e
+qps(no)->act->e
+`;
+
+    var diagram = flowchart.parse(code);
+    diagram.drawSVG('diagram', {
+      'x': 0,
+      'y': 0,
+      'line-width': 2,
+      'line-length': 40,
+      'text-margin': 8,
+      'font-size': 12,
+      'font-color': '#f5f7ff',
+      'line-color': '#3da9fc',
+      'element-color': '#3da9fc',
+      'fill': '#050814',
+      'yes-text': 'Yes',
+      'no-text': 'No',
+      'arrow-end': 'block',
+      'scale': 1,
+      'symbols': {
+        'start': { 'fill': '#151a2c' },
+        'end': { 'fill': '#151a2c' },
+        'condition': { 'fill': '#151a2c' },
+        'operation': { 'fill': '#151a2c' }
+      },
+      'flowstate': {}
     });
   </script>
 </body>
