@@ -2,109 +2,707 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Body Flow 1 – Overall Passenger Screening</title>
+  <title>Aviation Security – Flow Training Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
+    :root {
+      --bg: #050814;
+      --card: #111525;
+      --accent: #3da9fc;
+      --accent-soft: rgba(61,169,252,0.18);
+      --text-main: #f5f7ff;
+      --text-muted: #b5bdd9;
+      --danger: #ff6b6b;
+      --correct: #4cd964;
+    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #050814;
-      color: #f5f7ff;
+      background: radial-gradient(circle at top, #151a2c 0, #050814 55%, #020308 100%);
+      color: var(--text-main);
+    }
+    .wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px 12px 40px;
     }
     header {
-      padding: 10px 12px;
-      background: #050814;
+      padding: 10px 0 6px;
       border-bottom: 1px solid #252a3c;
+      margin-bottom: 10px;
     }
     header h1 {
-      font-size: 1.1rem;
       margin: 0 0 4px;
-      color: #3da9fc;
-      letter-spacing: 0.04em;
+      font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
     header p {
-      font-size: 0.8rem;
       margin: 0;
-      color: #b5bdd9;
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
-    .wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 10px 10px 40px;
+    .flow-select {
+      margin-top: 8px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
     }
-    #diagram {
-      width: 100%;
-      overflow-x: auto;
+    select {
+      margin-left: 4px;
+      padding: 3px 6px;
+      border-radius: 6px;
+      border: 1px solid #252a3c;
       background: #090d1a;
-      border-radius: 10px;
-      padding: 6px;
+      color: var(--text-main);
+      font-size: 0.84rem;
     }
-    svg {
-      max-width: none;
+    .game-card {
+      margin-top: 10px;
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid #252a3c;
+      padding: 10px;
+    }
+    .flow-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .situation {
+      font-size: 0.9rem;
+      margin: 4px 0 8px;
+    }
+    .question {
+      font-size: 0.88rem;
+      margin: 4px 0 6px;
+      color: #e0e4ff;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 6px 0 10px;
+    }
+    .option-btn {
+      text-align: left;
+      border-radius: 8px;
+      border: 1px solid #252a3c;
+      background: #090d1a;
+      color: var(--text-main);
+      padding: 6px 8px;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    }
+    .option-btn:hover {
+      border-color: var(--accent);
+      background: rgba(61,169,252,0.08);
+    }
+    .option-btn.correct {
+      border-color: var(--correct);
+      background: rgba(76,217,100,0.12);
+    }
+    .option-btn.wrong {
+      border-color: var(--danger);
+      background: rgba(255,107,107,0.12);
+    }
+    .feedback {
+      font-size: 0.82rem;
+      margin-top: 4px;
+      min-height: 1.2em;
+    }
+    .feedback.correct {
+      color: var(--correct);
+    }
+    .feedback.wrong {
+      color: var(--danger);
+    }
+    .next-btn {
+      margin-top: 8px;
+      padding: 5px 10px;
+      font-size: 0.84rem;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      cursor: pointer;
+    }
+    .next-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .progress {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
     }
   </style>
-  <!-- Raphael and Flowchart.js from CDN (no build tools) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.15.0/flowchart.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Body Flow 1 – Overall Passenger Screening</h1>
-    <p>Graphical IF → THEN flow, rendered with Flowchart.js.</p>
-  </header>
   <div class="wrapper">
-    <div id="diagram"></div>
+    <header>
+      <h1>Aviation Security – Flow Training Game</h1>
+      <p>Practice decision-making for each flow. Choose a flow, then pick the best action at every step.</p>
+      <div class="flow-select">
+        Flow:
+        <select id="flowSelect">
+          <option value="1">Body 1 – Overall Passenger Screening</option>
+          <option value="2">Body 2 – QPS Decision (Use / Skip)</option>
+          <option value="3">Body 3 – QPS Result / Activation</option>
+          <!-- We will add 4–15 here next -->
+        </select>
+      </div>
+    </header>
+
+    <div class="game-card">
+      <div id="flowLabel" class="flow-label"></div>
+      <div id="situation" class="situation"></div>
+      <div id="question" class="question"></div>
+      <div id="options" class="options"></div>
+      <div id="feedback" class="feedback"></div>
+      <button id="nextBtn" class="next-btn" disabled>Next step ▶</button>
+      <div id="progress" class="progress"></div>
+    </div>
   </div>
 
   <script>
-    // Flow 1: Overall Passenger Screening (People)
-    var code = `
-st=>start: Passenger arrives at lane
-de=>operation: Greet passenger\\nExplain process\\nDirect to divest/loading area
-req=>condition: Required items removed?\\n(coats, belts, shoes, pockets empty)
-tidy=>operation: Coach passenger to remove items\\nCheck trays again
-exc=>condition: Exception?\\nWheelchair / infant < 1m / pacemaker / > 2m
-adapt=>operation: Skip QPS\\nAdapted search\\n(manual + HHMD + ETD)
-noexc=>operation: Send passenger through QPS once
-qps=>condition: QPS result?
-clear=>operation: Passenger collects bags\\nPassenger exits screening
-act=>operation: Follow QPS Decision / Activation\\n(Flows 2 and 3)
-e=>end: End
+    // === FLOW DATA ===
+    // Each flow is an object: { label, steps: [ ... ] }
+    // Each step has: id, situation, question, options[], feedbackCorrect, feedbackWrong.
 
-st->de->req
-req(yes)->exc
-req(no)->tidy->req
-exc(yes)->adapt->e
-exc(no)->noexc->qps
-qps(yes)->clear->e
-qps(no)->act->e
-`;
-
-    var diagram = flowchart.parse(code);
-    diagram.drawSVG('diagram', {
-      'x': 0,
-      'y': 0,
-      'line-width': 2,
-      'line-length': 40,
-      'text-margin': 8,
-      'font-size': 12,
-      'font-color': '#f5f7ff',
-      'line-color': '#3da9fc',
-      'element-color': '#3da9fc',
-      'fill': '#050814',
-      'yes-text': 'Yes',
-      'no-text': 'No',
-      'arrow-end': 'block',
-      'scale': 1,
-      'symbols': {
-        'start': { 'fill': '#151a2c' },
-        'end': { 'fill': '#151a2c' },
-        'condition': { 'fill': '#151a2c' },
-        'operation': { 'fill': '#151a2c' }
+    const flows = {
+      "1": {
+        label: "Body Flow 1 – Overall Passenger Screening",
+        steps: [
+          {
+            id: "arrive",
+            situation: "A passenger arrives at your security lane with cabin baggage.",
+            question: "What is your first action?",
+            options: [
+              {
+                text: "Greet them, explain the screening process, and direct them to the divest area.",
+                correct: true,
+                next: "check_items"
+              },
+              {
+                text: "Immediately send them through QPS without speaking.",
+                correct: false,
+                next: "arrive"
+              },
+              {
+                text: "Ask them to wait while you check another lane.",
+                correct: false,
+                next: "arrive"
+              }
+            ],
+            feedbackCorrect: "Correct – you must greet, explain the process and direct to divest.",
+            feedbackWrong: "Not quite. Start by greeting, explaining, and sending them to divest."
+          },
+          {
+            id: "check_items",
+            situation: "The passenger is at the divest area putting items into trays.",
+            question: "Before sending them to QPS, what must you confirm?",
+            options: [
+              {
+                text: "That coats, belts, shoes are removed and pockets are empty.",
+                correct: true,
+                next: "exception_check"
+              },
+              {
+                text: "Only that liquids are in a plastic bag.",
+                correct: false,
+                next: "check_items"
+              },
+              {
+                text: "Nothing – as long as trays are not overloaded.",
+                correct: false,
+                next: "check_items"
+              }
+            ],
+            feedbackCorrect: "Right – required items must be removed before QPS.",
+            feedbackWrong: "Check that coats, belts, shoes are off and pockets are empty."
+          },
+          {
+            id: "exception_check",
+            situation: "The passenger has removed the required items. You now consider exceptions.",
+            question: "Which of the following would make them a QPS exception?",
+            options: [
+              {
+                text: "Wheelchair, infant under 1 m, pacemaker/medical reason, or height over 2 m.",
+                correct: true,
+                next: "branch_exception"
+              },
+              {
+                text: "Wearing a heavy coat but standing normally.",
+                correct: false,
+                next: "exception_check"
+              },
+              {
+                text: "Carrying a duty-free shopping bag.",
+                correct: false,
+                next: "exception_check"
+              }
+            ],
+            feedbackCorrect: "Correct – those are QPS exceptions under this flow.",
+            feedbackWrong: "Exceptions include wheelchair, infant <1m, pacemaker/medical and >2m tall."
+          },
+          {
+            id: "branch_exception",
+            situation: "You identify a valid QPS exception (for example, a wheelchair user).",
+            question: "What should you do?",
+            options: [
+              {
+                text: "Skip QPS and go to adapted search (manual + HHMD + ETD as required).",
+                correct: true,
+                next: "end_exception"
+              },
+              {
+                text: "Send them through QPS anyway and hope it is fine.",
+                correct: false,
+                next: "branch_exception"
+              }
+            ],
+            feedbackCorrect: "Correct – exceptions skip QPS and use adapted search.",
+            feedbackWrong: "Exceptions must not be forced through QPS; use adapted search."
+          },
+          {
+            id: "end_exception",
+            situation: "You have correctly moved the passenger to adapted search instead of QPS.",
+            question: "End of this path.",
+            options: [
+              {
+                text: "Restart Body Flow 1 from the beginning.",
+                correct: true,
+                next: "arrive"
+              }
+            ],
+            feedbackCorrect: "Good – you followed the exception path correctly.",
+            feedbackWrong: ""
+          },
+          {
+            id: "non_exception",
+            situation: "Assume now that the passenger is NOT an exception.",
+            question: "What is your next step for a non-exception passenger?",
+            options: [
+              {
+                text: "Send the passenger through QPS once.",
+                correct: true,
+                next: "qps_outcome"
+              },
+              {
+                text: "Skip QPS and only perform manual search.",
+                correct: false,
+                next: "non_exception"
+              },
+              {
+                text: "Send them through QPS multiple times for extra caution.",
+                correct: false,
+                next: "non_exception"
+              }
+            ],
+            feedbackCorrect: "Correct – non-exception passengers go through QPS once.",
+            feedbackWrong: "Non-exception passengers should be scanned once by QPS."
+          },
+          {
+            id: "qps_outcome",
+            situation: "The passenger has passed through QPS.",
+            question: "What are the two possible paths after QPS?",
+            options: [
+              {
+                text: "Clear: they collect bags and exit. Activation: follow QPS Activation Flows (2/3).",
+                correct: true,
+                next: "end_qps"
+              },
+              {
+                text: "Clear: send them back to the queue. Activation: ignore if they look calm.",
+                correct: false,
+                next: "qps_outcome"
+              }
+            ],
+            feedbackCorrect: "Exactly – clear = exit; activation = follow QPS flows 2 and 3.",
+            feedbackWrong: "QPS clear means exit; activation means following QPS activation flows."
+          },
+          {
+            id: "end_qps",
+            situation: "You have correctly handled the post-QPS outcome for the passenger.",
+            question: "End of this path.",
+            options: [
+              {
+                text: "Restart Body Flow 1 from the beginning.",
+                correct: true,
+                next: "arrive"
+              }
+            ],
+            feedbackCorrect: "Well done – you’ve completed Body Flow 1.",
+            feedbackWrong: ""
+          }
+        ],
+        startId: "arrive"
       },
-      'flowstate': {}
+
+      "2": {
+        label: "Body Flow 2 – QPS Decision Flow (Use / Skip)",
+        steps: [
+          {
+            id: "ready",
+            situation: "A passenger is ready for screening at the lane.",
+            question: "What do you check to decide if you can use QPS?",
+            options: [
+              {
+                text: "Height ≥ 1 m, can stand in the correct pose, and no medical QPS exemption.",
+                correct: true,
+                next: "can_use"
+              },
+              {
+                text: "Only whether they have taken off their shoes.",
+                correct: false,
+                next: "ready"
+              },
+              {
+                text: "Only whether they are carrying liquids.",
+                correct: false,
+                next: "ready"
+              }
+            ],
+            feedbackCorrect: "Correct – height, pose and medical status determine QPS use.",
+            feedbackWrong: "You must consider height, ability to pose and medical exemptions."
+          },
+          {
+            id: "can_use",
+            situation: "You are assessing whether this passenger can use QPS.",
+            question: "If they meet all the QPS conditions, what should you do?",
+            options: [
+              {
+                text: "Use QPS for screening.",
+                correct: true,
+                next: "refusal_check"
+              },
+              {
+                text: "Skip QPS and do manual search for everyone.",
+                correct: false,
+                next: "can_use"
+              }
+            ],
+            feedbackCorrect: "Right – if they meet the criteria, you use QPS.",
+            feedbackWrong: "If they meet the conditions, they should go through QPS."
+          },
+          {
+            id: "refusal_check",
+            situation: "Before starting QPS, you ask the passenger to walk into the scanner.",
+            question: "They refuse QPS for non-medical reasons. What should happen?",
+            options: [
+              {
+                text: "Call SM, move to private search, shoes off for X-ray, full physical search + HHMD + ETD, bags remain in search lane.",
+                correct: true,
+                next: "end_refusal"
+              },
+              {
+                text: "Let them skip security and go straight to the gate.",
+                correct: false,
+                next: "refusal_check"
+              },
+              {
+                text: "Argue with them in public until they agree.",
+                correct: false,
+                next: "refusal_check"
+              }
+            ],
+            feedbackCorrect: "Correct – non-medical refusal triggers SM and private search flow.",
+            feedbackWrong: "Non-medical refusals must be escalated to SM and resolved via private search."
+          },
+          {
+            id: "end_refusal",
+            situation: "You correctly followed the refusal path.",
+            question: "End of this path.",
+            options: [
+              {
+                text: "Restart Body Flow 2 from the beginning.",
+                correct: true,
+                next: "ready"
+              }
+            ],
+            feedbackCorrect: "Good – you handled QPS refusal correctly.",
+            feedbackWrong: ""
+          },
+          {
+            id: "under_1m",
+            situation: "Consider a different passenger: an infant under 1 m in height.",
+            question: "How do you handle QPS?",
+            options: [
+              {
+                text: "Do not use QPS; use adapted manual search with HHMD/ETD as appropriate.",
+                correct: true,
+                next: "end_under"
+              },
+              {
+                text: "Use QPS as normal.",
+                correct: false,
+                next: "under_1m"
+              }
+            ],
+            feedbackCorrect: "Correct – infants under 1 m do not go through QPS.",
+            feedbackWrong: "Passengers under 1 m require adapted search, not QPS."
+          },
+          {
+            id: "end_under",
+            situation: "You correctly handled the under-1m passenger.",
+            question: "End of this path.",
+            options: [
+              {
+                text: "Restart Body Flow 2 from the beginning.",
+                correct: true,
+                next: "ready"
+              }
+            ],
+            feedbackCorrect: "Nice – you’ve covered one key exception scenario.",
+            feedbackWrong: ""
+          }
+        ],
+        startId: "ready"
+      },
+
+      "3": {
+        label: "Body Flow 3 – QPS Result / Activation Flow",
+        steps: [
+          {
+            id: "post_qps",
+            situation: "A passenger has just passed through QPS.",
+            question: "What types of QPS results can you see?",
+            options: [
+              {
+                text: "Clear, zones activated, RND only, RND plus real activations, inadequate scan, insufficient quality.",
+                correct: true,
+                next: "clear_case"
+              },
+              {
+                text: "Only clear or fail.",
+                correct: false,
+                next: "post_qps"
+              }
+            ],
+            feedbackCorrect: "Correct – several different results influence your next action.",
+            feedbackWrong: "There are more result types than just clear or fail."
+          },
+          {
+            id: "clear_case",
+            situation: "QPS result = clear (no activations).",
+            question: "What should you do?",
+            options: [
+              {
+                text: "Let the passenger proceed to collect bags and leave.",
+                correct: true,
+                next: "zones_case"
+              },
+              {
+                text: "Send them for manual search anyway.",
+                correct: false,
+                next: "clear_case"
+              }
+            ],
+            feedbackCorrect: "Right – a clear QPS result means they can leave.",
+            feedbackWrong: "Clear QPS should send them to collect bags and exit."
+          },
+          {
+            id: "zones_case",
+            situation: "Another passenger shows one or more zones activated (not RND only).",
+            question: "What is the correct next step?",
+            options: [
+              {
+                text: "Send to a same-gender searcher, use HHMD on activated zones, follow the HHMD flow.",
+                correct: true,
+                next: "rnd_only"
+              },
+              {
+                text: "Ignore activations if they are only small.",
+                correct: false,
+                next: "zones_case"
+              }
+            ],
+            feedbackCorrect: "Exactly – zones activated require HHMD and body search steps.",
+            feedbackWrong: "Any zone activation needs HHMD and body search, not ignoring."
+          },
+          {
+            id: "rnd_only",
+            situation: "QPS shows RND at the left ankle but no real activations.",
+            question: "What should happen?",
+            options: [
+              {
+                text: "Send the passenger to SAMDEX (shoe scanner) and follow the SAMDEX flow.",
+                correct: true,
+                next: "rnd_plus"
+              },
+              {
+                text: "Treat them as fully clear and ignore the RND.",
+                correct: false,
+                next: "rnd_only"
+              }
+            ],
+            feedbackCorrect: "Correct – RND sends them to SAMDEX for shoe screening.",
+            feedbackWrong: "RND-only cases must be handled via the SAMDEX flow."
+          },
+          {
+            id: "rnd_plus",
+            situation: "QPS shows RND plus real activations in other zones.",
+            question: "How should you handle this?",
+            options: [
+              {
+                text: "Treat non-RND zones as real: HHMD/physical search those zones and send to SAMDEX if shoes are involved.",
+                correct: true,
+                next: "inadequate"
+              },
+              {
+                text: "Only send them to SAMDEX and ignore the other zones.",
+                correct: false,
+                next: "rnd_plus"
+              }
+            ],
+            feedbackCorrect: "Right – real zones need HHMD/physical search, plus SAMDEX for shoes.",
+            feedbackWrong: "You must address both the real zones and the shoe (RND) element."
+          },
+          {
+            id: "inadequate",
+            situation: "QPS result = 'inadequate scan'.",
+            question: "What do you do?",
+            options: [
+              {
+                text: "Correct posture and repeat once. If inadequate twice, do a full physical body search.",
+                correct: true,
+                next: "insufficient"
+              },
+              {
+                text: "Ignore it and assume the passenger is clear.",
+                correct: false,
+                next: "inadequate"
+              }
+            ],
+            feedbackCorrect: "Correct – one repeat only, then full search if still inadequate.",
+            feedbackWrong: "Inadequate scans must be corrected or escalated, not ignored."
+          },
+          {
+            id: "insufficient",
+            situation: "QPS result = 'insufficient quality' (system issue).",
+            question: "What is the correct response?",
+            options: [
+              {
+                text: "Ask the passenger to step back, call SM, and let SM decide manual search or re-routing.",
+                correct: true,
+                next: "end_qps3"
+              },
+              {
+                text: "Turn the machine off and send everyone through.",
+                correct: false,
+                next: "insufficient"
+              }
+            ],
+            feedbackCorrect: "Exactly – insufficient quality is a system issue for SM to handle.",
+            feedbackWrong: "System issues must be escalated to SM, not bypassed."
+          },
+          {
+            id: "end_qps3",
+            situation: "You have correctly handled the range of QPS result types.",
+            question: "End of Body Flow 3.",
+            options: [
+              {
+                text: "Restart Body Flow 3 from the beginning.",
+                correct: true,
+                next: "post_qps"
+              }
+            ],
+            feedbackCorrect: "Well done – you’ve completed Body Flow 3.",
+            feedbackWrong: ""
+          }
+        ],
+        startId: "post_qps"
+      }
+
+      // Flows 4–15 will be added in the same structure.
+    };
+
+    // === GAME ENGINE ===
+    let currentFlowId = "1";
+    let currentStepId = null;
+    let stepsTaken = 0;
+
+    const flowSelect = document.getElementById("flowSelect");
+    const flowLabelEl = document.getElementById("flowLabel");
+    const situationEl = document.getElementById("situation");
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const feedbackEl = document.getElementById("feedback");
+    const nextBtn = document.getElementById("nextBtn");
+    const progressEl = document.getElementById("progress");
+
+    function loadFlow(flowId) {
+      const flow = flows[flowId];
+      if (!flow) return;
+      currentFlowId = flowId;
+      currentStepId = flow.startId;
+      stepsTaken = 0;
+      flowLabelEl.textContent = flow.label;
+      renderStep();
+    }
+
+    function renderStep() {
+      const flow = flows[currentFlowId];
+      const step = flow.steps.find(s => s.id === currentStepId);
+      if (!step) return;
+
+      stepsTaken++;
+      situationEl.textContent = step.situation;
+      questionEl.textContent = step.question;
+      optionsEl.innerHTML = "";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+      nextBtn.disabled = true;
+      nextBtn.dataset.next = "";
+
+      step.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = opt.text;
+        btn.addEventListener("click", () => handleChoice(step, opt, btn));
+        optionsEl.appendChild(btn);
+      });
+
+      progressEl.textContent = "Flow " + currentFlowId + " • Step " + stepsTaken + " • Node: " + step.id;
+    }
+
+    function handleChoice(step, option, buttonEl) {
+      const allButtons = optionsEl.querySelectorAll(".option-btn");
+      allButtons.forEach(b => b.disabled = true);
+
+      if (option.correct) {
+        buttonEl.classList.add("correct");
+        feedbackEl.textContent = step.feedbackCorrect || "Correct.";
+        feedbackEl.classList.add("correct");
+      } else {
+        buttonEl.classList.add("wrong");
+        feedbackEl.textContent = step.feedbackWrong || "That is not the best action.";
+        feedbackEl.classList.add("wrong");
+      }
+
+      nextBtn.dataset.next = option.next;
+      nextBtn.disabled = false;
+    }
+
+    nextBtn.addEventListener("click", () => {
+      const next = nextBtn.dataset.next;
+      if (!next) return;
+      currentStepId = next;
+      renderStep();
     });
+
+    flowSelect.addEventListener("change", () => {
+      loadFlow(flowSelect.value);
+    });
+
+    // Initial load
+    loadFlow(currentFlowId);
   </script>
 </body>
 </html>
