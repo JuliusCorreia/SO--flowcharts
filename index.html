@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Aviation Security – Visual Flowcharts</title>
+  <title>Aviation Security – Interactive Flowcharts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       margin: 0;
@@ -12,7 +13,7 @@
       color: #f5f7ff;
     }
     .wrapper {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 12px 12px 40px;
     }
@@ -37,15 +38,15 @@
       margin: 0;
       color: #b5bdd9;
     }
-    .tabs {
+    .tabs-row {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 8px;
     }
     .tab-btn {
-      font-size: 0.8rem;
-      padding: 4px 9px;
+      font-size: 0.78rem;
+      padding: 4px 8px;
       border-radius: 999px;
       border: 1px solid #252a3c;
       background: rgba(10,14,30,0.95);
@@ -54,9 +55,9 @@
       white-space: nowrap;
     }
     .tab-btn.active {
-      border-color: #3da9fc;
-      background: rgba(61,169,252,0.16);
+      background: rgba(61,169,252,0.18);
       color: #3da9fc;
+      border-color: #3da9fc;
     }
     .chart-container {
       margin-top: 10px;
@@ -85,10 +86,11 @@
       background: #050814;
       border-radius: 8px;
       padding: 4px;
-      min-width: 360px; /* horizontal scrolling on small screens */
+      min-width: 420px;
     }
   </style>
-  <!-- Mermaid from CDN -->
+
+  <!-- Mermaid v11 from CDN -->
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 
@@ -98,7 +100,8 @@
       look: "handDrawn",
       securityLevel: "loose",
       flowchart: {
-        curve: "basis"
+        curve: "basis",
+        htmlLabels: true
       }
     });
   </script>
@@ -106,104 +109,51 @@
 <body>
   <div class="wrapper">
     <header>
-      <h1>Aviation Security Flowcharts</h1>
-      <p>Tap a tab to view a graphical IF → THEN flowchart. Pinch/scroll to explore.</p>
-      <div class="tabs">
-        <button class="tab-btn active" data-target="chart-body-1">Body 1 – Overall Screening</button>
-        <button class="tab-btn" data-target="chart-body-2">Body 2 – QPS Result / Activation</button>
-        <button class="tab-btn" data-target="chart-bag-9">Bag 9 – Overall Tray & Bag</button>
-        <!-- Add more buttons as we add more charts -->
+      <h1>Aviation Security – Interactive Flowcharts</h1>
+      <p>Select a flow. Use pinch/zoom or scroll to explore on mobile.</p>
+
+      <div class="tabs-row">
+        <button class="tab-btn active" data-target="flow-1">Body 1 – Overall Screening</button>
+        <!-- Add more buttons later -->
       </div>
     </header>
 
-    <!-- BODY 1: Overall Passenger Screening (People) -->
-    <section id="chart-body-1" class="chart-container active">
+    <!-- BODY FLOW 1 ONLY (for now) -->
+    <section id="flow-1" class="chart-container active">
       <p class="chart-title">Body Flow 1 – Overall Passenger Screening</p>
       <p class="chart-caption">From arrival at the lane through QPS / exception handling to exit.</p>
+
       <div class="mermaid">
 flowchart TD
-    A[Passenger arrives at lane] --> B[Officer greets &amp; explains process<br/>Direct to divest area]
-    B --> C{Required items removed?<br/>(coats, belts, shoes, pockets empty)}
+  A[Passenger arrives at lane] --> B[Officer greets and explains process<br/>Direct passenger to divest/loading area]
 
-    C -- No --> D[Coach passenger to remove items<br/>Check trays again] --> C
-    C -- Yes --> E{Exception?<br/>Wheelchair / infant &lt;1m / pacemaker / &gt;2m}
+  B --> C{Required items removed?<br/>Coats, belts, shoes, pockets empty}
 
-    E -- Yes --> F[Skip QPS<br/>Go to adapted search<br/>(manual + HHMD + ETD)]
-    E -- No --> G[Send passenger through QPS once]
+  C -- "No" --> C1[Coach passenger to remove items<br/>Check trays again] --> C
+  C -- "Yes" --> D{Exception?<br/>Wheelchair, infant under 1 m,<br/>pacemaker or medical issue, height over 2 m}
 
-    G --> H{QPS result}
+  D -- "Yes: exception" --> E[Skip QPS<br/>Go to adapted search<br/>Manual search plus HHMD and ETD]
+  D -- "No: not exception" --> F[Send passenger through QPS once]
 
-    H -- Clear --> I[Passenger collects bags<br/>Passenger exits screening]
-    H -- Activation --> J[Follow QPS Decision / Activation flows<br/>(Flows 2 &amp; 3)]
+  F --> G{QPS result}
+
+  G -- "Clear" --> H[Passenger collects bags<br/>Passenger exits screening]
+  G -- "Activation" --> I[Follow QPS Use or Skip (Flow 2)<br/>and QPS Result flow (Flow 3)]
       </div>
     </section>
 
-    <!-- BODY 3 (your Flow 3): QPS Result / Activation -->
-    <section id="chart-body-2" class="chart-container">
-      <p class="chart-title">Body Flow 3 – QPS Result / Activation</p>
-      <p class="chart-caption">How different QPS outcomes drive HHMD, SAMDEX, or manual search.</p>
-      <div class="mermaid">
-flowchart TD
-    A[QPS completed] --> B{Result type?}
-
-    B -- "Clear<br/>(no activations)" --> C[Passenger proceeds<br/>Collect bags &amp; leave]
-
-    B -- "Zones activated<br/>(not RND only)" --> D[Send to same-gender searcher]
-    D --> E[Use HHMD on activated zones]
-    E --> F[Follow HHMD flow<br/>(resolve activations)]
-
-    B -- "RND only at left ankle" --> G[Send passenger to SAMDEX<br/>(shoe scanner)]
-    G --> H[Follow SAMDEX flow]
-
-    B -- "RND + real activations" --> I[Treat non-RND zones as real]
-    I --> J[HHMD/physical search on real zones]
-    J --> K[Also send to SAMDEX if RND shows shoes]
-
-    B -- "Inadequate scan" --> L[Correct posture]
-    L --> M[Repeat scan once]
-    M --> N{Still inadequate?}
-    N -- Yes --> O[Stop scanning<br/>Full physical body search]
-    N -- No --> B
-
-    B -- "Insufficient quality<br/>(system issue)" --> P[Ask passenger to step back]
-    P --> Q[Call SM – SM decides<br/>Manual search or re‑routing]
-      </div>
-    </section>
-
-    <!-- BAG 9: Overall Tray & Bag Flow -->
-    <section id="chart-bag-9" class="chart-container">
-      <p class="chart-title">Bag Flow 9 – Overall Tray &amp; Bag Flow</p>
-      <p class="chart-caption">From loading area preparation through imaging to clear or bag search.</p>
-      <div class="mermaid">
-flowchart TD
-    A[Passenger arrives at loading area] --> B[Officer instructs to remove<br/>coats, belts, shoes, LAGs,<br/>large metal items]
-    B --> C[Items placed into trays]
-
-    C --> D{Trays tidy?<br/>1 bag/tray, items flat}
-
-    D -- No --> E[Re‑organise trays<br/>Coach passenger] --> C
-    D -- Yes --> F[Send trays through X‑ray / CT]
-
-    F --> G{Image outcome}
-
-    G -- "Clear<br/>No alarms, no suspicion" --> H[Mark tray as cleared]
-    H --> I[Passenger collects bag<br/>Passenger leaves screening]
-
-    G -- "EDS alarm / shield alarm<br/>or operator suspicion" --> J[Reject tray to bag search area]
-    J --> K[Follow Bag Search Flow<br/>(Flow 11)]
-      </div>
-    </section>
+    <!-- You can paste additional <section> blocks here for flows 2–15 -->
 
   </div>
 
   <script>
-    // Simple tab switching
-    const tabBtns = document.querySelectorAll('.tab-btn');
+    // Tab switching
+    const buttons = document.querySelectorAll('.tab-btn');
     const charts = document.querySelectorAll('.chart-container');
 
-    tabBtns.forEach(btn => {
+    buttons.forEach(btn => {
       btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
+        buttons.forEach(b => b.classList.remove('active'));
         charts.forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
         const target = document.getElementById(btn.dataset.target);
